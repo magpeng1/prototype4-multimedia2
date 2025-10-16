@@ -1,71 +1,48 @@
 import { useState, useEffect } from 'react';
-import { BookOpen, Save } from 'lucide-react';
-import { VoiceRecorder } from './components/VoiceRecorder';
+import { BookOpen, Save, Calendar } from 'lucide-react';
 import { TextEditor } from './components/TextEditor';
-import { RecordingsList } from './components/RecordingsList';
-import { supabase, JournalEntry } from './lib/supabase';
+import { MediaUploader } from './components/MediaUploader';
+import { MediaCard } from './components/MediaCard';
+import { JournalEntry, MediaItem } from './types/journal';
+import { saveEntry, getEntries, generateId } from './utils/storage';
 
 function App() {
   const [textContent, setTextContent] = useState('');
-  const [voiceDuration, setVoiceDuration] = useState(0);
-  const [showRecordings, setShowRecordings] = useState(false);
+  const [mediaItems, setMediaItems] = useState<MediaItem[]>([]);
   const [isSaving, setIsSaving] = useState(false);
-  const [userId, setUserId] = useState<string | null>(null);
+  const [entries, setEntries] = useState<JournalEntry[]>([]);
 
   useEffect(() => {
-    initializeAuth();
+    loadEntries();
   }, []);
 
-  const initializeAuth = async () => {
-    const { data: { session } } = await supabase.auth.getSession();
-
-    if (!session) {
-      const { data, error } = await supabase.auth.signInAnonymously();
-      if (error) {
-        console.error('Auth error:', error);
-      } else {
-        setUserId(data.user?.id || null);
-      }
-    } else {
-      setUserId(session.user.id);
-    }
+  const loadEntries = () => {
+    const savedEntries = getEntries();
+    setEntries(savedEntries);
   };
 
   const handleSave = async () => {
-    if (!userId) {
-      console.error('No user authenticated');
-      return;
-    }
-
-    if (!textContent.trim() && voiceDuration === 0) {
+    if (!textContent.trim() && mediaItems.length === 0) {
       return;
     }
 
     setIsSaving(true);
 
     try {
-      const hasText = textContent.trim().length > 0;
-      const hasVoice = voiceDuration > 0;
-
-      const entry = {
-        user_id: userId,
-        type: hasVoice ? 'voice' : 'text',
-        content: hasText
-          ? textContent
-          : `Voice recording (${voiceDuration}s)`,
-        duration: hasVoice ? voiceDuration : undefined,
+      const entry: JournalEntry = {
+        id: generateId(),
+        text: textContent,
+        mediaItems: [...mediaItems],
+        createdAt: new Date(),
+        updatedAt: new Date()
       };
 
-      const { error } = await supabase
-        .from('journal_entries')
-        .insert(entry);
+      saveEntry(entry);
+      loadEntries();
 
-      if (error) throw error;
-
-      console.log('Entry saved successfully');
-
+      // Clear the form
       setTextContent('');
-      setVoiceDuration(0);
+      setMediaItems([]);
     } catch (error) {
       console.error('Error saving entry:', error);
     } finally {
@@ -73,78 +50,124 @@ function App() {
     }
   };
 
-  const handleEntrySelect = (entry: JournalEntry) => {
-    if (entry.type === 'text') {
-      setTextContent(entry.content);
-      setVoiceDuration(0);
-    } else {
-      setVoiceDuration(entry.duration || 0);
-      setTextContent('');
-    }
+  const handleMediaAdd = (media: MediaItem) => {
+    setMediaItems(prev => [...prev, media]);
   };
 
-  const hasContent = textContent.trim().length > 0 || voiceDuration > 0;
+  const handleMediaRemove = (mediaId: string) => {
+    setMediaItems(prev => prev.filter(item => item.id !== mediaId));
+  };
+
+  const hasContent = textContent.trim().length > 0 || mediaItems.length > 0;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-950 via-gray-900 to-gray-950 text-gray-200">
-      <div className="max-w-3xl mx-auto px-4 py-8 flex flex-col min-h-screen">
-        <header className="flex items-center justify-between mb-12">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-50">
+      <div className="max-w-2xl mx-auto px-4 py-8 flex flex-col min-h-screen">
+        {/* Header */}
+        <header className="flex items-center justify-between mb-8">
           <div className="flex items-center gap-3">
-            <BookOpen className="w-7 h-7 text-emerald-400" />
-            <h1 className="text-2xl font-light tracking-wide">Journl</h1>
-          </div>
-
-          <button
-            onClick={() => setShowRecordings(true)}
-            className="p-2 hover:bg-gray-800/50 rounded-lg transition-colors"
-            aria-label="View recordings"
-          >
-            <div className="flex items-center gap-2">
-              <div className="w-1.5 h-1.5 rounded-full bg-gray-600"></div>
-              <div className="w-1.5 h-1.5 rounded-full bg-gray-600"></div>
-              <div className="w-1.5 h-1.5 rounded-full bg-gray-600"></div>
+            <div className="p-2 bg-indigo-100 rounded-xl">
+              <BookOpen className="w-6 h-6 text-indigo-600" />
             </div>
-          </button>
+            <h1 className="text-2xl font-light text-gray-800 tracking-wide">Journl</h1>
+          </div>
+          
+          <div className="flex items-center gap-2 text-sm text-gray-500">
+            <Calendar className="w-4 h-4" />
+            <span>{new Date().toLocaleDateString()}</span>
+          </div>
         </header>
 
-        <div className="flex-1 flex flex-col">
-          <div className="mb-8 space-y-8">
-            <div className="bg-gray-900/50 rounded-2xl p-6 border border-gray-800/50 backdrop-blur-sm">
-              <TextEditor
-                value={textContent}
-                onChange={setTextContent}
-                placeholder="What's on your mind today?"
-              />
-            </div>
-
-            <div className="flex items-center justify-center py-8">
-              <VoiceRecorder onRecordingComplete={setVoiceDuration} />
-            </div>
+        {/* Main Content */}
+        <div className="flex-1 flex flex-col space-y-6">
+          {/* Text Editor */}
+          <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+            <TextEditor
+              value={textContent}
+              onChange={setTextContent}
+              placeholder="What's on your mind today?"
+            />
           </div>
 
-          <div className="mt-auto pt-8">
+          {/* Media Items Display */}
+          {mediaItems.length > 0 && (
+            <div className="space-y-3">
+              <h3 className="text-sm font-medium text-gray-600 px-1">Attachments</h3>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {mediaItems.map((item) => (
+                  <MediaCard
+                    key={item.id}
+                    item={item}
+                    onRemove={handleMediaRemove}
+                  />
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Media Uploader */}
+          <div className="flex justify-start">
+            <MediaUploader onMediaAdd={handleMediaAdd} />
+          </div>
+
+          {/* Save Button */}
+          <div className="pt-4">
             {hasContent && (
               <button
                 onClick={handleSave}
                 disabled={isSaving}
-                className="w-full py-4 bg-emerald-500 hover:bg-emerald-600 disabled:bg-gray-800 disabled:text-gray-500 text-white rounded-xl transition-all flex items-center justify-center gap-2 shadow-lg shadow-emerald-500/20"
+                className="w-full py-4 bg-indigo-500 hover:bg-indigo-600 disabled:bg-gray-300 disabled:text-gray-500 text-white rounded-2xl transition-all flex items-center justify-center gap-2 shadow-sm font-medium"
               >
                 <Save className="w-5 h-5" />
-                <span className="font-light">
+                <span>
                   {isSaving ? 'Saving...' : 'Save Entry'}
                 </span>
               </button>
             )}
           </div>
         </div>
-      </div>
 
-      {showRecordings && (
-        <RecordingsList
-          onClose={() => setShowRecordings(false)}
-          onEntrySelect={handleEntrySelect}
-        />
-      )}
+        {/* Recent Entries */}
+        {entries.length > 0 && (
+          <div className="mt-12 pt-8 border-t border-gray-100">
+            <h2 className="text-lg font-medium text-gray-800 mb-4">Recent Entries</h2>
+            <div className="space-y-4 max-h-96 overflow-y-auto">
+              {entries.slice(0, 5).map((entry) => (
+                <div
+                  key={entry.id}
+                  className="bg-white rounded-xl p-4 shadow-sm border border-gray-100 hover:shadow-md transition-shadow"
+                >
+                  <div className="flex items-start justify-between mb-2">
+                    <span className="text-xs text-gray-500">
+                      {entry.createdAt.toLocaleDateString()} at {entry.createdAt.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                    </span>
+                  </div>
+                  
+                  {entry.text && (
+                    <p className="text-gray-700 text-sm mb-3 line-clamp-3">
+                      {entry.text}
+                    </p>
+                  )}
+                  
+                  {entry.mediaItems.length > 0 && (
+                    <div className="flex items-center gap-2 text-xs text-gray-500">
+                      <span>{entry.mediaItems.length} attachment{entry.mediaItems.length > 1 ? 's' : ''}</span>
+                      <div className="flex gap-1">
+                        {entry.mediaItems.slice(0, 3).map((item, idx) => (
+                          <div
+                            key={idx}
+                            className="w-2 h-2 rounded-full bg-gray-300"
+                          />
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 }

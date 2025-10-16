@@ -6,13 +6,13 @@ interface TextEditorProps {
   placeholder?: string;
 }
 
-export function TextEditor({ value, onChange, placeholder }: TextEditorProps) {
+export const TextEditor = ({ value, onChange, placeholder }: TextEditorProps) => {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
     if (textareaRef.current) {
       textareaRef.current.style.height = 'auto';
-      textareaRef.current.style.height = textareaRef.current.scrollHeight + 'px';
+      textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`;
     }
   }, [value]);
 
@@ -22,8 +22,8 @@ export function TextEditor({ value, onChange, placeholder }: TextEditorProps) {
       value={value}
       onChange={(e) => onChange(e.target.value)}
       placeholder={placeholder}
-      className="w-full bg-transparent text-gray-200 placeholder-gray-600 resize-none outline-none text-lg leading-relaxed min-h-[200px]"
+      className="w-full bg-transparent text-gray-800 placeholder-gray-400 resize-none outline-none text-lg leading-relaxed min-h-[120px] font-light"
       style={{ fontFamily: 'system-ui, -apple-system, sans-serif' }}
     />
   );
-}
+};
