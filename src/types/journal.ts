@@ -1,9 +1,10 @@
 export interface MediaItem {
   id: string;
-  type: 'image' | 'link' | 'document';
+  type: 'image' | 'link' | 'document' | 'voice';
   url: string;
   name: string;
   size?: number;
+  duration?: number; // For voice recordings in seconds
   preview?: {
     title?: string;
     favicon?: string;

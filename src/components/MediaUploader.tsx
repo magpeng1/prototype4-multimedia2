@@ -166,7 +166,7 @@ export const MediaUploader = ({ onMediaAdd }: MediaUploaderProps) => {
             <button
               onClick={handleLinkAdd}
               disabled={!linkUrl.trim() || !isValidUrl(linkUrl) || isLoading}
-              className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:bg-gray-300 disabled:cursor-not-allowed text-sm font-medium transition-colors"
+              className="px-4 py-2 bg-sky-400 text-white rounded-lg hover:bg-sky-500 disabled:bg-gray-300 disabled:cursor-not-allowed text-sm font-medium transition-colors"
             >
               Add
             </button>
@@ -179,7 +179,7 @@ export const MediaUploader = ({ onMediaAdd }: MediaUploaderProps) => {
         <button
           onClick={() => setIsExpanded(!isExpanded)}
           disabled={isLoading}
-          className="flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl transition-colors disabled:opacity-50"
+          className="flex items-center gap-2 px-4 py-2 bg-rose-100 hover:bg-rose-200 text-rose-700 rounded-xl transition-colors disabled:opacity-50"
         >
           <Plus className={`w-4 h-4 transition-transform ${isExpanded ? 'rotate-45' : ''}`} />
           <span className="text-sm font-medium">Add media</span>
@@ -191,7 +191,7 @@ export const MediaUploader = ({ onMediaAdd }: MediaUploaderProps) => {
             <button
               onClick={() => imageInputRef.current?.click()}
               disabled={isLoading}
-              className="flex items-center gap-2 px-3 py-2 bg-green-100 hover:bg-green-200 text-green-700 rounded-lg transition-colors disabled:opacity-50"
+              className="flex items-center gap-2 px-3 py-2 bg-emerald-100 hover:bg-emerald-200 text-emerald-700 rounded-lg transition-colors disabled:opacity-50"
             >
               <Image className="w-4 h-4" />
               <span className="text-sm">Image</span>
@@ -202,7 +202,7 @@ export const MediaUploader = ({ onMediaAdd }: MediaUploaderProps) => {
                 setShowLinkInput(true);
               }}
               disabled={isLoading}
-              className="flex items-center gap-2 px-3 py-2 bg-blue-100 hover:bg-blue-200 text-blue-700 rounded-lg transition-colors disabled:opacity-50"
+              className="flex items-center gap-2 px-3 py-2 bg-sky-100 hover:bg-sky-200 text-sky-700 rounded-lg transition-colors disabled:opacity-50"
             >
               <Link className="w-4 h-4" />
               <span className="text-sm">Link</span>
@@ -211,7 +211,7 @@ export const MediaUploader = ({ onMediaAdd }: MediaUploaderProps) => {
             <button
               onClick={() => documentInputRef.current?.click()}
               disabled={isLoading}
-              className="flex items-center gap-2 px-3 py-2 bg-red-100 hover:bg-red-200 text-red-700 rounded-lg transition-colors disabled:opacity-50"
+              className="flex items-center gap-2 px-3 py-2 bg-amber-100 hover:bg-amber-200 text-amber-700 rounded-lg transition-colors disabled:opacity-50"
             >
               <FileText className="w-4 h-4" />
               <span className="text-sm">Document</span>

@@ -1,4 +1,4 @@
-import { X, FileText, Link } from 'lucide-react';
+import { X, FileText, Link, Mic, Play, Pause } from 'lucide-react';
 import { MediaItem } from '../types/journal';
 import { getMediaFile } from '../utils/storage';
 
@@ -59,7 +59,7 @@ export const MediaCard = ({ item, onRemove }: MediaCardProps) => {
         return (
           <div className="flex items-center gap-3 p-4">
             <div className="flex-shrink-0">
-              <FileText className="w-8 h-8 text-red-500" />
+              <FileText className="w-8 h-8 text-amber-500" />
             </div>
             <div className="flex-1 min-w-0">
               <p className="font-medium text-sm text-gray-900 truncate">
@@ -71,6 +71,28 @@ export const MediaCard = ({ item, onRemove }: MediaCardProps) => {
                 </p>
               )}
             </div>
+          </div>
+        );
+
+      case 'voice':
+        return (
+          <div className="flex items-center gap-3 p-4">
+            <div className="flex-shrink-0">
+              <Mic className="w-8 h-8 text-rose-500" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="font-medium text-sm text-gray-900 truncate">
+                {item.name}
+              </p>
+              {item.duration && (
+                <p className="text-xs text-gray-500">
+                  {formatDuration(item.duration)}
+                </p>
+              )}
+            </div>
+            <button className="p-2 hover:bg-gray-100 rounded-full transition-colors">
+              <Play className="w-4 h-4 text-gray-600" />
+            </button>
           </div>
         );
 
@@ -113,4 +135,10 @@ const formatFileSize = (bytes: number): string => {
   const sizes = ['Bytes', 'KB', 'MB', 'GB'];
   const i = Math.floor(Math.log(bytes) / Math.log(k));
   return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+};
+
+const formatDuration = (seconds: number): string => {
+  const mins = Math.floor(seconds / 60);
+  const secs = seconds % 60;
+  return `${mins}:${secs.toString().padStart(2, '0')}`;
 };

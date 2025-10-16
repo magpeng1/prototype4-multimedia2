@@ -3,6 +3,7 @@ import { BookOpen, Save, Calendar } from 'lucide-react';
 import { TextEditor } from './components/TextEditor';
 import { MediaUploader } from './components/MediaUploader';
 import { MediaCard } from './components/MediaCard';
+import { VoiceRecorder } from './components/VoiceRecorder';
 import { JournalEntry, MediaItem } from './types/journal';
 import { saveEntry, getEntries, generateId } from './utils/storage';
 
@@ -61,15 +62,15 @@ function App() {
   const hasContent = textContent.trim().length > 0 || mediaItems.length > 0;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-50">
+    <div className="min-h-screen bg-gradient-to-br from-rose-50 via-amber-50 to-emerald-50">
       <div className="max-w-2xl mx-auto px-4 py-8 flex flex-col min-h-screen">
         {/* Header */}
         <header className="flex items-center justify-between mb-8">
           <div className="flex items-center gap-3">
-            <div className="p-2 bg-indigo-100 rounded-xl">
-              <BookOpen className="w-6 h-6 text-indigo-600" />
+            <div className="p-2 bg-rose-100 rounded-xl">
+              <BookOpen className="w-6 h-6 text-rose-500" />
             </div>
-            <h1 className="text-2xl font-light text-gray-800 tracking-wide">Journl</h1>
+            <h1 className="text-2xl font-light text-gray-700 tracking-wide">Journl</h1>
           </div>
           
           <div className="flex items-center gap-2 text-sm text-gray-500">
@@ -105,6 +106,9 @@ function App() {
             </div>
           )}
 
+          {/* Voice Recorder */}
+          <VoiceRecorder onRecordingComplete={handleMediaAdd} />
+
           {/* Media Uploader */}
           <div className="flex justify-start">
             <MediaUploader onMediaAdd={handleMediaAdd} />
@@ -116,7 +120,7 @@ function App() {
               <button
                 onClick={handleSave}
                 disabled={isSaving}
-                className="w-full py-4 bg-indigo-500 hover:bg-indigo-600 disabled:bg-gray-300 disabled:text-gray-500 text-white rounded-2xl transition-all flex items-center justify-center gap-2 shadow-sm font-medium"
+                className="w-full py-4 bg-emerald-400 hover:bg-emerald-500 disabled:bg-gray-300 disabled:text-gray-500 text-white rounded-2xl transition-all flex items-center justify-center gap-2 shadow-sm font-medium"
               >
                 <Save className="w-5 h-5" />
                 <span>
